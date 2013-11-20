@@ -59,6 +59,8 @@
             NDJS.initDatatables();
             //initiate the colorbox on a list of links
             NDJS.initColorbox();
+            //codequery show/hide functionality
+            NDJS.handleCodeQuery();
             //detect hash changes to navigate hidden ndependPages
             $(window).on('hashchange', NDJS.navigatePages);
         },
@@ -288,6 +290,19 @@
                         opt.prop('selected', true);
                         opt.change();
                     });
+                }
+            });
+        },
+        handleCodeQuery: function(){
+            $('.codequery_code').each(function(){
+                $(this).append("<span class='handle'>View Code Query or Rule Body</span>");
+            });
+            $('#content').on('click','.codequery_code .handle',function(){
+                var par = $(this).parent();
+                if(par.hasClass('collapsed')){
+                    $(this).parent().removeClass('collapsed');
+                }else{
+                    $(this).parent().addClass('collapsed');
                 }
             });
         },
