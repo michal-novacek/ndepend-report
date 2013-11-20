@@ -42,19 +42,11 @@
 * by Michal Novacek
 * September 9, 2013
 */
-(function () {
+(function ($) {
     "use strict";
     var NDJS = {
         init: function () {
             $(document).ready(NDJS.ready);
-            //check if google charts can be loaded
-            if (typeof google != 'undefined') {
-                //load the google charts, set an onload callback function
-                google.load("visualization", "1", { packages: ["corechart"] });
-                google.setOnLoadCallback(NDJS.setChartReady);
-            } else {
-                NDJS.offline = 1;
-            }
             //modify the dataTables sorting functions
             NDJS.customSort();
         },
@@ -176,9 +168,6 @@
                     NDJS.cache.screen.show();
                     NDJS.initDatatables();
                     window.scrollTo(0, 0);
-                    if (hash.match('#TrendCharts')) {
-                        NDJS.googleChart();
-                    }
                 }
             } else {
                 //no hash = display homepage
@@ -302,110 +291,12 @@
                 }
             });
         },
-
-
-        googleChart: function () {
-            for (var i = 0; i < googleChartGraphDatas.length; i++) {
-                var googleChartGraphData = googleChartGraphDatas[i];
-                NDJS.googleChartDisplay(googleChartGraphData, 'gchart' + i);
-            }
-        },
-
-        googleChartDisplay: function (googleChartGraphData, divElementId) {
-            if (NDJS.offline == 0) {
-                if (NDJS.chartReady == 1) {
-                    var data1 = new google.visualization.DataTable(googleChartGraphData.ChartData);
-                    var chart1 = new google.visualization.AreaChart(document.getElementById(divElementId));
-                    var date_formatter = new google.visualization.DateFormat({ pattern: 'M/d/yyyy H:mm:ss' });
-                    date_formatter.format(data1, 0);
-                    chart1.draw(data1, googleChartGraphData.Options);
-                } else {
-                    setTimeout(NDJS.googleChart, 100);
-                }
-            } else {
-                //parse the google chart data and display it as table if offline
-                $('#gchart_offline').show();
-                var data = googleChartGraphData.ChartData;
-                var table = document.createElement('table');
-                var thead = document.createElement('thead');
-                var tbody = document.createElement('tbody');
-                table.className = 'ndependGrid';
-                table.cellPadding = 0;
-                table.cellSpacing = 0;
-                table.border = 0;
-                var labels = [];
-                var rows = [];
-                $(data.cols).each(function (idx) {
-                    labels[idx] = this.label;
-                });
-                labels[0] = "Date";
-                labels.pop();
-                labels.pop();
-                var row = document.createElement('tr');
-                $(labels).each(function () {
-                    $(row).append('<th>' + this + '</th>');
-                })
-                $(thead).append(row);
-                $(table).append(thead);
-                var bodyrows = [];
-                $(data.rows).each(function (idx) {
-                    bodyrows[idx] = document.createElement('tr');
-                    var thisidx = idx;
-                    var thisrow = this.c;
-                    if (thisrow.length == 8) {
-                        thisrow.pop();
-                        thisrow[5] = thisrow[6];
-                        thisrow.pop();
-                    } else {
-                        thisrow[5] = thisrow[6];
-                        thisrow.pop();
-                    }
-                    $(thisrow).each(function (idx) {
-                        var val = this.v;
-                        if (idx == 0) {
-                            var newval = '';
-                            newval = newval + (val.getMonth() + 1);
-                            newval = newval + '/';
-                            newval = newval + val.getDate();
-                            newval = newval + '/';
-                            newval = newval + val.getFullYear();
-                            newval = newval + ' ';
-                            newval = newval + val.getHours();
-                            newval = newval + ':';
-                            var mins = val.getMinutes();
-                            var secs = val.getSeconds();
-                            if (mins < 10) {
-                                mins = '0' + mins;
-                            }
-                            if (secs < 10) {
-                                secs = '0' + secs;
-                            }
-                            newval = newval + mins;
-                            newval = newval + ':';
-                            newval = newval + secs;
-                            val = newval;
-                        }
-                        $(bodyrows[thisidx]).append('<td>' + val + '</td>');
-                    });
-                    $(tbody).append(bodyrows[thisidx]);
-                });
-                $(table).append(tbody);
-                $('#' + divElementId).addClass('offline').append(table);
-            }
-        },
-
-        //callback of the google chart api load function
-        setChartReady: function () {
-            NDJS.chartReady = 1;
-        },
         //cache of jquery selectors
         cache: {
             screen: {},
             menu: {},
             menuli: {}
-        },
-        offline: 0,
-        chartReady: 0
+        }
     };
     NDJS.init();
-})();
+})(jQuery);
